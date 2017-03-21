@@ -1,0 +1,6 @@
+string[] properties
+string[] values
+---
+bool result
+string instance
+string class_name

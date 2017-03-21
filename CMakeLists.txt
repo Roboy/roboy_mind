@@ -29,15 +29,12 @@ add_service_files(
     srvCheckQuery.srv
     srvCreateInstance.srv
     srvFindInstances.srv
-    srvPositionOf.srv
     srvShowInstances.srv
     srvShowProperty.srv
     srvShowPropertyValue.srv
-    srvSizeOf.srv
-    srvStoragePlace.srv
-    srvSubclassOf.srv
-    srvSubclassesOf.srv
-    srvSiblingsOf.srv
+
+    srvSaveObject.srv
+    srvGetObject.srv
  )
 
 ## Generate added messages and services with any dependencies listed here

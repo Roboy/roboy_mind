@@ -139,54 +139,6 @@ bool RoboyMind::findInstancesSRV(roboy_mind::srvFindInstances::Request  &req,rob
     return true;
 }
 
-bool RoboyMind::positionOfSRV(roboy_mind::srvPositionOf::Request  &req,roboy_mind::srvPositionOf::Response &res)
-{
-    vector<float> position;
-
-    string query = "owl_has('" + ontology_name + req.object + "','" + ontology_name + "xCoord',P)";
-    if (SHOW_QUERIES) 
-        cout << query << endl;
-    // Quering Prolog to see the X - coordinate
-    PrologQueryProxy bdgs = pl.query(query);
-    stringstream ss;
-    for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
-    {
-        PrologBindings bdg = *it;
-        cout << "X - coordinate: " << bdg["P"] << endl;
-        ss << bdg["P"];
-        position.push_back(StrToFloat(ss.str()));
-        ss.str(std::string());
-    }   
-    query = "owl_has('" + ontology_name + req.object + "','" + ontology_name + "yCoord',P)";
-    if (SHOW_QUERIES) 
-        cout << query << endl;
-    // Quering Prolog to see the Y - coordinate
-    bdgs = pl.query(query);
-    for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
-    {
-        PrologBindings bdg = *it;
-        cout << "Y - coordinate: " << bdg["P"] << endl;
-        ss << bdg["P"];
-        position.push_back(StrToFloat(ss.str()));
-        ss.str(std::string());
-    }   
-    query = "owl_has('" + ontology_name + req.object + "','" + ontology_name + "zCoord',P)";
-    if (SHOW_QUERIES) 
-        cout << query << endl;
-    // Quering Prolog to see the Z - coordinate
-    bdgs = pl.query(query);
-    for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
-    {
-        PrologBindings bdg = *it;
-        cout << "Z - coordinate: " << bdg["P"] << endl;
-        ss << bdg["P"];
-        position.push_back(StrToFloat(ss.str()));
-        ss.str(std::string());
-    }
-    res.position = position;
-    return true;
-}
-
 bool RoboyMind::showInstancesSRV(roboy_mind::srvShowInstances::Request  &req,roboy_mind::srvShowInstances::Response &res)
 {
     vector<string> result;
@@ -262,238 +214,93 @@ bool RoboyMind::showPropertyValueSRV(roboy_mind::srvShowPropertyValue::Request  
     return true;
 }
 
-bool RoboyMind::sizeOfSRV(roboy_mind::srvSizeOf::Request  &req,roboy_mind::srvSizeOf::Response &res)
-{
-    // vector<float> size;
+bool RoboyMind::saveObjectSRV(roboy_mind::srvSaveObject::Request  &req,roboy_mind::srvSaveObject::Response &res)
+{    
     // Query part for the object
-    string query = "owl_has('" + ontology_name + req.object + "','" + ontology_name + "widthOfObject',P)";
-    // Quering Prolog to see the properties and values
-    PrologQueryProxy bdgs = pl.query(query);
-    if (SHOW_QUERIES) 
+    // save_object(Class, ID, Properties, Values, Instance)
+    stringstream main, prop, val;
+    main << "save_object('" << req.class_name << "','" << req.id << "',['";
+    // Save names
+    for (int i = 0; i < req.properties.size(); i++)
+    {
+        if (i != req.properties.size() - 1)
+        {
+            prop << req.properties[i] << "','";
+            val << req.values[i] << "','";
+        }
+        else
+        {
+            prop << req.properties[i] << "'],['";
+            val << req.values[i] << "'],";         
+        }
+    }
+    main << prop.str() << val.str() << " Instance)";
+    string query = main.str();
+    query.erase(std::remove(query.begin(), query.end(), '\n'), query.end());
+    if (SHOW_QUERIES)   
         cout << query << endl;
-    stringstream ss;
+    PrologQueryProxy bdgs = pl.query(query);
+    res.result = false;
+    string inst;
     for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
     {
         PrologBindings bdg = *it;
-        cout << "Value : " << bdg["P"] << endl;
-        ss << bdg["P"];
-        res.size.push_back(StrToFloat(ss.str()));
-        ss.str(std::string());
+        inst = (bdg["Instance"].toString());
+        if (inst.find("#", 0) !=std::string::npos)
+            res.instance = inst.substr(inst.find("#", 0)+1);
+        else
+            res.instance = inst;
+        res.result = true;
     }
-    if (res.size.empty())
-    {
-        query = "owl_has('" + ontology_name + req.object + "','" + ontology_name + "radius',P)";
-        if (SHOW_QUERIES) 
-            cout << query << endl;
-        // Quering Prolog to see the properties and values
-        bdgs = pl.query(query);
-        for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
-        {
-            PrologBindings bdg = *it;
-            cout << "Value : " << bdg["P"] << endl;
-            ss << bdg["P"];
-            res.size.push_back(StrToFloat(ss.str()));
-            ss.str(std::string());
-        }   
-        query = "owl_has('" + ontology_name + req.object + "','" + ontology_name + "heightOfObject',P)";
-        if (SHOW_QUERIES) 
-            cout << query << endl;
-        // Quering Prolog to see the properties and values
-        bdgs = pl.query(query);
-        for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
-        {
-            PrologBindings bdg = *it;
-            cout << "Value : " << bdg["P"] << endl;
-            ss << bdg["P"];
-            res.size.push_back(StrToFloat(ss.str()));
-            ss.str(std::string());
-        }   
-        res.radius = true;
-    }
-    else
-    {
-        query = "owl_has('"+ ontology_name + req.object + "','" + ontology_name + "depthOfObject',P)";
-        if (SHOW_QUERIES) 
-            cout << query << endl;
-        // Quering Prolog to see the properties and values
-        PrologQueryProxy bdgs = pl.query(query);
-        for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
-        {
-            PrologBindings bdg = *it;
-            cout << "Value : " << bdg["P"] << endl;
-            ss << bdg["P"];
-            res.size.push_back(StrToFloat(ss.str()));
-            ss.str(std::string());
-        }   
-        query = "owl_has('" + ontology_name + req.object + "','" + ontology_name + "heightOfObject',P)";
-        if (SHOW_QUERIES) 
-            cout << query << endl;
-        // Quering Prolog to see the properties and values
-        bdgs = pl.query(query);
-        for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
-        {
-            PrologBindings bdg = *it;
-            cout << "Value : " << bdg["P"] << endl;
-            ss << bdg["P"];
-            res.size.push_back(StrToFloat(ss.str()));
-            ss.str(std::string());
-        }   
-        res.radius = false;
-    }
-    // res.size = size;
-    return true;
+    return true;  
 }
 
-bool RoboyMind::storagePlaceSRV(roboy_mind::srvStoragePlace::Request  &req,roboy_mind::srvStoragePlace::Response &res)
-{
-    vector<string> result;
-    // Query part for the object
-    string query = "storagePlaceFor(Place,'" + this->ontology_name + req.object + "')";
-    if (SHOW_QUERIES) 
-        cout << query << endl;
-    // Quering Prolog to see the properties and values
-    PrologQueryProxy bdgs = pl.query(query);
-    stringstream ss;
-    for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
-    {
-        PrologBindings bdg = *it;
-        ss << bdg["Place"];
-        if (std::find(result.begin(), result.end(), ss.str()) == result.end())
-            result.push_back(ss.str());
-        ss.str(std::string());
-    }
-    res.storage = result;
-    return true;
-}
 
-bool RoboyMind::subclassOfSRV(roboy_mind::srvSubclassOf::Request  &req,roboy_mind::srvSubclassOf::Response &res)
-{
-    // STEP 1: Get object class
-    vector<string> obj_class;
+bool RoboyMind::getObjectSRV(roboy_mind::srvGetObject::Request  &req,roboy_mind::srvGetObject::Response &res)
+{    
     // Query part for the object
-    string query = "rdfs_individual_of('" + this->ontology_name + req.object + "',Class)";
-    if (SHOW_QUERIES) 
+    // get_object(Properties, Values, Class, Instance)
+    stringstream main, prop, val;
+    main << "get_object(['";
+    // Save names
+    for (int i = 0; i < req.properties.size(); i++)
+    {
+        if (i != req.properties.size() - 1)
+        {
+            prop << req.properties[i] << "','";
+            val << req.values[i] << "','";
+        }
+        else
+        {
+            prop << req.properties[i] << "'],['";
+            val << req.values[i] << "'],";         
+        }
+    }
+    main << prop.str() << val.str() << " Class, Instance)";
+    string query = main.str();
+    query.erase(std::remove(query.begin(), query.end(), '\n'), query.end());
+    if (SHOW_QUERIES)   
         cout << query << endl;
-    // Quering Prolog to see the properties and values
     PrologQueryProxy bdgs = pl.query(query);
-    stringstream ss;
+    res.result = false;
+    string inst,cl;
     for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
     {
         PrologBindings bdg = *it;
-        ss << bdg["Class"];
-        if (std::find(obj_class.begin(), obj_class.end(), ss.str()) == obj_class.end())
-            obj_class.push_back(ss.str());
-        ss.str(std::string());
-    }
-    // STEP 2: Get parent class
-    vector<string> result;
-    // Query part for the object
-    query = "owl_subclass_of('" + obj_class[0] + "',Parent)";
-    if (SHOW_QUERIES) 
-        cout << query << endl;
-    // Quering Prolog to see the properties and values
-    bdgs = pl.query(query);
-    for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
-    {
-        PrologBindings bdg = *it;
-        ss << bdg["Parent"];
-        if (std::find(result.begin(), result.end(), ss.str()) == result.end())
-            result.push_back(ss.str());
-        ss.str(std::string());
-    }
-    res.superclass = result[1];
-    return true;
-}
+        inst = (bdg["Instance"].toString());
+        if (inst.find("#", 0) !=std::string::npos)
+            res.instance = inst.substr(inst.find("#", 0)+1);
+        else
+            res.instance = inst;
 
-bool RoboyMind::subclassesOfSRV(roboy_mind::srvSubclassesOf::Request  &req,roboy_mind::srvSubclassesOf::Response &res)
-{
-    // STEP 1: Get object class
-    vector<string> obj_class;
-    // Query part for the object
-    string query = "rdfs_individual_of('" + this->ontology_name + req.object + "',Class)";
-    if (SHOW_QUERIES) 
-        cout << query << endl;
-    // Quering Prolog to see the properties and values
-    PrologQueryProxy bdgs = pl.query(query);
-    stringstream ss;
-    for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
-    {
-        PrologBindings bdg = *it;
-        ss << bdg["Class"];
-        obj_class.push_back(ss.str());
-        ss.str(std::string());
+        cl = (bdg["Class"].toString());
+        if (cl.find("#", 0) !=std::string::npos)
+            res.class_name = cl.substr(cl.find("#", 0)+1);
+        else
+            res.instance = inst;
+        res.result = true;
     }
-    // STEP 2: Get parent class
-    vector<string> result;
-    // Query part for the object
-    query = "owl_subclass_of('" + obj_class[0] + "',Parent)";
-    if (SHOW_QUERIES) 
-        cout << query << endl;
-    // Quering Prolog to see the properties and values
-    bdgs = pl.query(query);
-    for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
-    {
-        PrologBindings bdg = *it;
-        ss << bdg["Parent"];
-        if (std::find(result.begin(), result.end(), ss.str()) == result.end())
-            result.push_back(ss.str());
-        ss.str(std::string());
-    }
-    res.superclass = result;
-    return true;
-}
-
-bool RoboyMind::siblingsOfSRV(roboy_mind::srvSiblingsOf::Request  &req,roboy_mind::srvSiblingsOf::Response &res)
-{
-    // STEP 1: Get object class
-    vector<string> obj_class;
-    // Query part for the object
-    string query = "rdfs_individual_of('" + this->ontology_name + req.object + "',Class)";
-    if (SHOW_QUERIES) 
-        cout << query << endl;
-    // Quering Prolog to see the properties and values
-    PrologQueryProxy bdgs = pl.query(query);
-    stringstream ss;
-    for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
-    {
-        PrologBindings bdg = *it;
-        ss << bdg["Class"];
-        obj_class.push_back(ss.str());
-        ss.str(std::string());
-    }
-    // STEP 2: Get parent class
-    vector<string> result;
-    // Query part for the object
-    query = "owl_subclass_of('" + obj_class[0] + "',Parent)";
-    if (SHOW_QUERIES) 
-        cout << query << endl;
-    // Quering Prolog to see the properties and values
-    bdgs = pl.query(query);
-    for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
-    {
-        PrologBindings bdg = *it;
-        ss << bdg["Parent"];
-        result.push_back(ss.str());
-        ss.str(std::string());
-    }
-    // STEP 3: Get siblings
-    vector<string> instances;
-    query = "rdfs_individual_of(Siblings, '" +result[1] + "')";
-    if (SHOW_QUERIES) 
-        cout << query << endl;
-    // Quering Prolog to see the instances
-    bdgs = pl.query(query);
-    for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
-    {
-        PrologBindings bdg = *it;
-        ss << bdg["Siblings"];
-        if (ss.str() != (this->ontology_name + req.object))
-            if (std::find(instances.begin(), instances.end(), ss.str()) == instances.end())
-                instances.push_back(ss.str());
-        ss.str(std::string());
-    }
-    res.siblings = instances;
-    return true;
+    return true;  
 }
 
 
@@ -507,15 +314,12 @@ RoboyMind::RoboyMind(ros::NodeHandle nh) : nh_(nh), priv_nh_("~")
     check_query_service = nh_.advertiseService("/roboy_mind/check_query",&RoboyMind::checkQuerySRV,this);
     create_instance_service = nh_.advertiseService("/roboy_mind/create_instance",&RoboyMind::createInstanceSRV,this);
     find_instances_service = nh_.advertiseService("/roboy_mind/find_instances",&RoboyMind::findInstancesSRV,this);
-    position_of_service = nh_.advertiseService("/roboy_mind/position_of",&RoboyMind::positionOfSRV,this);
     show_instances_service = nh_.advertiseService("/roboy_mind/show_instances",&RoboyMind::showInstancesSRV,this);
     show_properties_service = nh_.advertiseService("/roboy_mind/show_property",&RoboyMind::showPropertySRV,this);
     show_property_value_service = nh_.advertiseService("/roboy_mind/show_property_value",&RoboyMind::showPropertyValueSRV,this);
-    size_of_service = nh_.advertiseService("/roboy_mind/size_of",&RoboyMind::sizeOfSRV,this);
-    storage_place_service = nh_.advertiseService("/roboy_mind/storage_place",&RoboyMind::storagePlaceSRV,this);
-    subclass_of_service = nh_.advertiseService("/roboy_mind/subclass_of",&RoboyMind::subclassOfSRV,this);
-    subclasses_of_service = nh_.advertiseService("/roboy_mind/subclasses_of",&RoboyMind::subclassesOfSRV,this);
-    siblings_of_service = nh_.advertiseService("/roboy_mind/siblings_of",&RoboyMind::siblingsOfSRV,this);
+
+    save_object_service = nh_.advertiseService("/roboy_mind/save_object",&RoboyMind::saveObjectSRV,this);
+    get_object_service = nh_.advertiseService("/roboy_mind/get_object",&RoboyMind::getObjectSRV,this);
 
     //nh.param<std::string>("/knowrob", knowrob, "http://knowrob.org/kb/knowrob.owl#");
     nh.param<std::string>("/ontology_name", ontology_name, "http://knowrob.org/kb/knowrob.owl#");//"http://knowrob.org/kb/semRoom_semantic_map.owl#");
