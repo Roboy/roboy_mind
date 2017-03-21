@@ -23,23 +23,11 @@
 #include <roboy_mind/srvCheckQuery.h>
 #include <roboy_mind/srvCreateInstance.h>
 #include <roboy_mind/srvFindInstances.h>
-<<<<<<< HEAD
-#include <roboy_mind/srvPositionOf.h>
-#include <roboy_mind/srvShowInstances.h>
-#include <roboy_mind/srvShowProperty.h>
-#include <roboy_mind/srvShowPropertyValue.h>
-#include <roboy_mind/srvSizeOf.h>
-#include <roboy_mind/srvStoragePlace.h>
-#include <roboy_mind/srvSubclassOf.h>
-#include <roboy_mind/srvSubclassesOf.h>
-#include <roboy_mind/srvSiblingsOf.h>
-=======
 #include <roboy_mind/srvShowInstances.h>
 #include <roboy_mind/srvShowProperty.h>
 #include <roboy_mind/srvShowPropertyValue.h>
 #include <roboy_mind/srvSaveObject.h>
 #include <roboy_mind/srvGetObject.h>
->>>>>>> New services added
 
 
 #include <common.hpp>
