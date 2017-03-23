@@ -1,5 +1,5 @@
 string class_name
-float64 id
+int32 id
 string[] properties
 string[] values
 ---
