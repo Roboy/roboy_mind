@@ -10,6 +10,9 @@
  *  Storing all definitions of RoboyMin dclass methods.
  */
 #include <roboy_mind/reasoning_node.h>
+#include "json.hpp"
+
+using json = nlohmann::json;
 
 /* *******************
 * Service functions
@@ -167,6 +170,7 @@ bool RoboyMind::showPropertySRV(roboy_mind::srvShowProperty::Request  &req,roboy
     vector<string> result;
     // Query part for the object
     string query = "owl_has('";
+    cout << "Ontology name:" << ontology_name << endl;
     query += ontology_name;
     query += req.object;
     query += "',A,P)";
@@ -175,16 +179,22 @@ bool RoboyMind::showPropertySRV(roboy_mind::srvShowProperty::Request  &req,roboy
     // Quering Prolog to see the properties and values
     PrologQueryProxy bdgs = pl.query(query);
     stringstream ss;
+    json attributes;
     for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
     {
         PrologBindings bdg = *it;
         cout << "Property : " << bdg["A"] << endl;
         cout << "Value : " << bdg["P"] << endl;
+        string property = bdg["A"].toString().substr(bdg["A"].toString().find("#") + 1); //remove the ontology name
+        string value = bdg["P"].toString();
+        attributes[property] = value;
         ss << bdg["A"];
+        ss << bdg["P"];
         result.push_back(ss.str());
         ss.str(std::string());
     }
-    res.property = result;
+    // string
+    res.property = attributes.dump();
     return true;
 }
 
@@ -273,23 +283,26 @@ bool RoboyMind::getObjectSRV(roboy_mind::srvGetObject::Request  &req,roboy_mind:
 {    
     // Query part for the object
     // get_object(Properties, Values, Class, Instance)
-    stringstream main, prop, val;
-    main << "get_object(['";
+    stringstream main;
+    stringstream prop(req.properties);
+    stringstream val(req.values);
+
+    main << "get_object([";
     // Save names
-    for (int i = 0; i < req.properties.size(); i++)
-    {
-        if (i != req.properties.size() - 1)
-        {
-            prop << req.properties[i] << "','";
-            val << req.values[i] << "','";
-        }
-        else
-        {
-            prop << req.properties[i] << "'],['";
-            val << req.values[i] << "'],";         
-        }
-    }
-    main << prop.str() << val.str() << " Class, Instance)";
+    // for (int i = 0; i < req.properties.size(); i++)
+    // {
+    //     if (i != req.properties.size() - 1)
+    //     {
+    //         prop << req.properties[i] << "','";
+    //         val << req.values[i] << "','";
+    //     }
+    //     else
+    //     {
+    //         prop << req.properties[i] << "'],['";
+    //         val << req.values[i] << "'],";         
+    //     }
+    // }
+    main << prop.str() << "],[" << val.str() << "], Class, Instance)";
     string query = main.str();
     query.erase(std::remove(query.begin(), query.end(), '\n'), query.end());
     if (SHOW_QUERIES)   
@@ -334,8 +347,9 @@ RoboyMind::RoboyMind(ros::NodeHandle nh) : nh_(nh), priv_nh_("~")
     save_object_service = nh_.advertiseService("/roboy_mind/save_object",&RoboyMind::saveObjectSRV,this);
     get_object_service = nh_.advertiseService("/roboy_mind/get_object",&RoboyMind::getObjectSRV,this);
 
-    //nh.param<std::string>("/knowrob", knowrob, "http://knowrob.org/kb/knowrob.owl#");
-    nh.param<std::string>("/ontology_name", ontology_name, "http://knowrob.org/kb/knowrob.owl#");//"http://knowrob.org/kb/semRoom_semantic_map.owl#");
+    // nh.param<std::string>("/knowrob", knowrob, "http://knowrob.org/kb/knowrob.owl#");
+    // nh.param<std::string>("/ontology_name", ontology_name, "http://knowrob.org/kb/semRoom_semantic_map.owl#");//"http://knowrob.org/kb/knowrob.owl#");/
+    nh.param<std::string>("/ontology_name", ontology_name, "http://knowrob.org/kb/knowrob.owl#");
 };
 
 int main(int argc, char** argv)

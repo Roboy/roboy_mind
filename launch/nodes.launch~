@@ -1,4 +1,4 @@
 <launch>
 
-  <!-- node name="reasoning_node" pkg="tumgo_reasoning" type="reasoning_node" cwd="node" output="screen" / -->
+  <!-- node name="reasoning_node" pkg="roboy_mind" type="reasoning_node" cwd="node" output="screen" / -->
 </launch>
