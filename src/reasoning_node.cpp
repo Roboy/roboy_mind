@@ -218,23 +218,36 @@ bool RoboyMind::saveObjectSRV(roboy_mind::srvSaveObject::Request  &req,roboy_min
 {    
     // Query part for the object
     // save_object(Class, ID, Properties, Values, Instance)
-    stringstream main, prop, val;
-    main << "save_object('" << req.class_name << "','" << req.id << "',['";
+    stringstream main;
+    stringstream prop(req.properties);
+    stringstream val(req.values);
+
+    main << "save_object('" << req.class_name << "','" << req.id << "',[";
+
+    // stringstream ss(req.properties);
+    // std::vector<string> properties;
+
+    // while(ss.good())
+    // {
+    //     string substr;
+    //     getline(ss, substr, ',');
+    //     properties.push_back(substr);
+    // }
     // Save names
-    for (int i = 0; i < req.properties.size(); i++)
-    {
-        if (i != req.properties.size() - 1)
-        {
-            prop << req.properties[i] << "','";
-            val << req.values[i] << "','";
-        }
-        else
-        {
-            prop << req.properties[i] << "'],['";
-            val << req.values[i] << "'],";         
-        }
-    }
-    main << prop.str() << val.str() << " Instance)";
+    // for (int i = 0; i < properties.size(); i++)
+    // {
+    //     if (i != req.properties.size() - 1)
+    //     {
+    //         prop << req.properties[i] << "','";
+    //         val << req.values[i] << "','";
+    //     }
+    //     else
+    //     {
+    //         prop << req.properties[i] << "'],['";
+    //         val << req.values[i] << "'],";         
+    //     }
+    // }
+    main << prop.str() << "],[" << val.str() << "]," << " Instance)";
     string query = main.str();
     query.erase(std::remove(query.begin(), query.end(), '\n'), query.end());
     if (SHOW_QUERIES)   
