@@ -23,15 +23,11 @@
 #include <roboy_mind/srvCheckQuery.h>
 #include <roboy_mind/srvCreateInstance.h>
 #include <roboy_mind/srvFindInstances.h>
-#include <roboy_mind/srvPositionOf.h>
 #include <roboy_mind/srvShowInstances.h>
 #include <roboy_mind/srvShowProperty.h>
 #include <roboy_mind/srvShowPropertyValue.h>
-#include <roboy_mind/srvSizeOf.h>
-#include <roboy_mind/srvStoragePlace.h>
-#include <roboy_mind/srvSubclassOf.h>
-#include <roboy_mind/srvSubclassesOf.h>
-#include <roboy_mind/srvSiblingsOf.h>
+#include <roboy_mind/srvSaveObject.h>
+#include <roboy_mind/srvGetObject.h>
 
 
 #include <common.hpp>
@@ -108,14 +104,6 @@ public:
      */
     bool findInstancesSRV(roboy_mind::srvFindInstances::Request  &req,roboy_mind::srvFindInstances::Response &res);
 
-    /** Service server for showing position of the instance
-     *  @param   req            object of srvPositionOf::Request service type,
-     *  @param   res            object of srvPositionOf::Response service type,
-     *  @param   object         name of the instance, string
-     *  @return  vector of X-,Y- and Z- coordinates of the object
-     */
-    bool positionOfSRV(roboy_mind::srvPositionOf::Request  &req,roboy_mind::srvPositionOf::Response &res);
-
     /** Service server for showing instances
      *  @param   req            object of srvShowInstances::Request service type,
      *  @param   res            object of srvShowInstances::Response service type,
@@ -141,45 +129,10 @@ public:
      */
     bool showPropertyValueSRV(roboy_mind::srvShowPropertyValue::Request  &req,roboy_mind::srvShowPropertyValue::Response &res);
 
-    /** Service server for showing storage places for objects
-     *  @param   req            object of srvSizeOf::Request service type,
-     *  @param   res            object of srvSizeOf::Response service type,
-     *  @param   object         name of the instance, string
-     *  @return  boolean stating whether the object is rounded (then it has 2dimensions - height and radius, otherwise 3)
-     */
-    bool sizeOfSRV(roboy_mind::srvSizeOf::Request  &req,roboy_mind::srvSizeOf::Response &res);
 
-    /** Service server for showing storage places for objects
-     *  @param   req            object of srvStoragePlace::Request service type,
-     *  @param   res            object of srvStoragePlace::Response service type,
-     *  @param   object         name of the instance, string
-     *  @return  storage place for the object class
-     */
-    bool storagePlaceSRV(roboy_mind::srvStoragePlace::Request  &req,roboy_mind::srvStoragePlace::Response &res);
+    bool saveObjectSRV(roboy_mind::srvSaveObject::Request  &req,roboy_mind::srvSaveObject::Response &res);
 
-    /** Service server for showing parent class of an object
-     *  @param   req            object of srvSubclassOf::Request service type,
-     *  @param   res            object of srvSubclassOf::Response service type,
-     *  @param   object         name of the instance, string
-     *  @return  parent subclass
-     */
-    bool subclassOfSRV(roboy_mind::srvSubclassOf::Request  &req,roboy_mind::srvSubclassOf::Response &res);
-
-    /** Service server for showing all parent class of an object
-     *  @param   req            object of srvSubclassesOf::Request service type,
-     *  @param   res            object of srvSubclassesOf::Response service type,
-     *  @param   object         name of the instance, string
-     *  @return  parent subclasses
-     */
-    bool subclassesOfSRV(roboy_mind::srvSubclassesOf::Request  &req,roboy_mind::srvSubclassesOf::Response &res);
-
-    /** Service server for showing all sibling class of an object
-     *  @param   req            object of srvSiblingsOf::Request service type,
-     *  @param   res            object of srvSiblingsOf::Response service type,
-     *  @param   object         name of the instance, string
-     *  @return  sibling classes
-     */
-    bool siblingsOfSRV(roboy_mind::srvSiblingsOf::Request  &req,roboy_mind::srvSiblingsOf::Response &res);
+    bool getObjectSRV(roboy_mind::srvGetObject::Request  &req,roboy_mind::srvGetObject::Response &res);
 
 private:
     Prolog pl;
@@ -193,15 +146,12 @@ private:
     ros::ServiceServer check_property_service;
     ros::ServiceServer create_instance_service;
     ros::ServiceServer find_instances_service;
-    ros::ServiceServer position_of_service;
     ros::ServiceServer show_instances_service;
     ros::ServiceServer show_properties_service;
     ros::ServiceServer show_property_value_service;
-    ros::ServiceServer size_of_service;
-    ros::ServiceServer storage_place_service;
-    ros::ServiceServer subclass_of_service;
-    ros::ServiceServer subclasses_of_service;
-    ros::ServiceServer siblings_of_service;
+
+    ros::ServiceServer save_object_service;
+    ros::ServiceServer get_object_service;
 
     /// The node handle
     ros::NodeHandle nh_;
