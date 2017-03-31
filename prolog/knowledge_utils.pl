@@ -14,6 +14,12 @@ of the predicates
 
 :- module(knowledge_utils,
     [
+    assert_property/3,
+    check_property/3,
+    find_instances/3,
+    show_instances/2,
+    show_property/3,
+    show_property_value/3,
 	save_object/5,
 	get_properties/3,
 	get_object/4
@@ -32,14 +38,62 @@ get_class_path(Class, Class_path) :-
 	( % Class has already a URI
 	   Class_path=Class );
 	  % When the class does not have URL, will get the knowrob path
-	(atom_concat('http://knowrob.org/kb/knowrob.owl#', Class, Class_path1),
-	atom_concat('http://knowrob.org/kb/semRoom_semantic_map.owl#', Class, Class_path2),
-	findall(A,owl_subclass_of(Class_path1,A),List),
-	length(List,L),
-    (L > 2) -> 
+	(atom_concat('http://knowrob.org/kb/knowrob.owl#', Class, CP1),
+	findall(A,owl_subclass_of(CP1,A),List1),
+	%write('Check KnowRob subclasses'),nl,
+	length(List1,L1),
+    (L1 > 2) -> 
 		atom_concat('http://knowrob.org/kb/knowrob.owl#', Class, Class_path);
-	atom_concat('http://knowrob.org/kb/semRoom_semantic_map.owl#', Class, Class_path)
- 	)).
+	(%write('Check KnowRob individuals'),nl,
+		atom_concat('http://knowrob.org/kb/knowrob.owl#', Class, CP4),
+		findall(D,rdfs_individual_of(CP4,D),List4),
+		length(List4,L4),
+	    (L4 > 2) -> 
+			atom_concat('http://knowrob.org/kb/knowrob.owl#', Class, Class_path);	
+		(%write('Check semRoom subclasses'),nl,
+			atom_concat('http://knowrob.org/kb/semRoom_semantic_map.owl#', Class, CP2),
+			findall(B,owl_subclass_of(CP2,B),List2),
+			length(List2,L2),
+		    (L2 > 2) -> 
+				atom_concat('http://knowrob.org/kb/semRoom_semantic_map.owl#', Class, Class_path);
+			(%write('Check semRoom individuals'),nl,
+				atom_concat('http://knowrob.org/kb/semRoom_semantic_map.owl#', Class, CP3),
+				findall(C,rdfs_individual_of(CP3,C),List3),
+				length(List3,L3),
+			    (L3 > 2) -> 
+					atom_concat('http://knowrob.org/kb/semRoom_semantic_map.owl#', Class, Class_path);
+				Class_path = Class
+	))))).
+
+assert_property(Instance,Property,Value) :-
+	get_class_path(Instance, I_path),
+	get_class_path(Property, P_path),
+	get_class_path(Value, V_path),
+	rdf_assert(I_path, P_path, V_path).
+
+check_property(Instance,Property,Value) :-
+	get_class_path(Instance, I_path),
+	get_class_path(Property, P_path),
+	get_class_path(Value, V_path),
+	owl_has(I_path, P_path, V_path).
+
+find_instances(Instance,Property,Value) :-
+	get_class_path(Property, P_path),
+	get_class_path(Value, V_path),
+	owl_has(Instance, P_path, V_path).
+
+show_instances(Instance,Class) :-
+	get_class_path(Class, C_path),
+	rdfs_individual_of(Instance, C_path).
+
+show_property(Instance,Property, Value) :-
+	get_class_path(Instance, I_path),
+	owl_has(I_path, Property, Value).
+
+show_property_value(Instance,Property, Value) :-
+	get_class_path(Instance, I_path),
+	get_class_path(Property, P_path),
+	owl_has(I_path, P_path, Value).
 
 assert_properties(Instance,Properties,Values) :-
 	([P] = Properties) ->	
@@ -77,4 +131,5 @@ get_properties(Properties,Values,Instance) :-
 
 get_object(Properties, Values, Class, Instance) :-
 	get_properties(Properties,Values,Instance),
-	rdfs_individual_of(Instance,Class),!.
+	findall(C,rdfs_individual_of(Instance,C),List),
+	[Class|Tail] = List.

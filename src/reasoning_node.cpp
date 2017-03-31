@@ -20,19 +20,7 @@ using json = nlohmann::json;
 bool RoboyMind::assertPropertySRV(roboy_mind::srvAssertProperty::Request  &req,roboy_mind::srvAssertProperty::Response &res)
 {
     // Query part for the object
-    string query = "rdf_assert('" + this->ontology_name;
-    query += req.object;
-    query += "','" + this->ontology_name;
-    query += req.property;
-    if (!req.data){
-      query += "','" + this->ontology_name;
-      query += req.instance;
-    }
-    else{
-      query += "','";
-      query += req.instance;
-    }
-    query += "')";
+    string query = "assert_property('" + req.object + "','" + req.property + "','" + req.instance + "')";
     if (SHOW_QUERIES)   
         cout << query << endl;
     PrologQueryProxy bdgs = pl.query(query);
@@ -42,7 +30,7 @@ bool RoboyMind::assertPropertySRV(roboy_mind::srvAssertProperty::Request  &req,r
 
 bool RoboyMind::callQuerySRV(roboy_mind::srvCallQuery::Request  &req,roboy_mind::srvCallQuery::Response &res)
 {
-    // Quering Prolog to see the instances
+    // Quering Prolog
     PrologQueryProxy bdgs = pl.query(req.query);
     if (SHOW_QUERIES) 
         cout << req.query << endl;
@@ -50,7 +38,6 @@ bool RoboyMind::callQuerySRV(roboy_mind::srvCallQuery::Request  &req,roboy_mind:
     for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
     {
         PrologBindings bdg = *it;
-        //cout << "Query is : " << (bool)(it == bdgs.end()) << endl;
         res.result = true;
     }
     return true;
@@ -60,16 +47,7 @@ bool RoboyMind::callQuerySRV(roboy_mind::srvCallQuery::Request  &req,roboy_mind:
 bool RoboyMind::checkPropertySRV(roboy_mind::srvCheckProperty::Request  &req,roboy_mind::srvCheckProperty::Response &res)
 {
     // Query part for the object
-    string query = "owl_has('" + this->ontology_name;
-    query += req.object;
-    query += "','" + this->ontology_name;
-    query += req.property;
-    if (!req.data)
-      query += "','" + this->ontology_name;
-    else
-      query += "','";
-    query += req.instance;
-    query += "')";
+    string query = "check_property('" + req.object + "','" + req.property + "','" + req.instance + "')";
     if (SHOW_QUERIES) 
         cout << query << endl;
     PrologQueryProxy bdgs = pl.query(query);
@@ -77,7 +55,6 @@ bool RoboyMind::checkPropertySRV(roboy_mind::srvCheckProperty::Request  &req,rob
     for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
     {
         PrologBindings bdg = *it;
-        //cout << "Real query is : " << (bool)(it == bdgs.end()) << endl;
         res.result = true;
     }
 }
@@ -116,16 +93,8 @@ bool RoboyMind::createInstanceSRV(roboy_mind::srvCreateInstance::Request  &req,r
 
 bool RoboyMind::findInstancesSRV(roboy_mind::srvFindInstances::Request  &req,roboy_mind::srvFindInstances::Response &res)
 {
-    vector<string> result;
     // Query part for the object
-    string query = "owl_has(A,'" + this->ontology_name;
-    query += req.property;
-    query += "','";
-    if (!req.data){
-      query += "" + this->ontology_name;
-    }
-    query += req.value;
-    query += "')";
+    string query = "find_instances(A,'" + req.property + "','" + req.value + "')";
     if (SHOW_QUERIES)   
         cout << query << endl;
     PrologQueryProxy bdgs = pl.query(query);
@@ -133,21 +102,16 @@ bool RoboyMind::findInstancesSRV(roboy_mind::srvFindInstances::Request  &req,rob
     for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
     {
         PrologBindings bdg = *it;
-        //cout << "A : " << bdg["A"] << endl;
         ss << bdg["A"];
-        result.push_back(ss.str());
+        res.instances.push_back(ss.str());
         ss.str(std::string());
     }
-    res.instances = result;
     return true;
 }
 
 bool RoboyMind::showInstancesSRV(roboy_mind::srvShowInstances::Request  &req,roboy_mind::srvShowInstances::Response &res)
 {
-    vector<string> result;
-    string query = "rdfs_individual_of(I, '" + this->ontology_name;
-    query += req.object_class;
-    query += "')";
+    string query = "show_instances(I, '" + req.object_class + "')";
     if (SHOW_QUERIES) 
         cout << query << endl;
     // Quering Prolog to see the instances
@@ -156,24 +120,17 @@ bool RoboyMind::showInstancesSRV(roboy_mind::srvShowInstances::Request  &req,rob
     for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
     {
         PrologBindings bdg = *it;
-        //cout << "I : " << bdg["I"] << endl;
         ss << bdg["I"];
-        result.push_back(ss.str());
+        res.instances.push_back(ss.str());
         ss.str(std::string());
     }
-    res.instances = result;
     return true;
 }
 
 bool RoboyMind::showPropertySRV(roboy_mind::srvShowProperty::Request  &req,roboy_mind::srvShowProperty::Response &res)
 {
-    vector<string> result;
     // Query part for the object
-    string query = "owl_has('";
-    cout << "Ontology name:" << ontology_name << endl;
-    query += ontology_name;
-    query += req.object;
-    query += "',A,P)";
+    string query = "show_property('" + req.object + "',A,P)";
     if (SHOW_QUERIES) 
         cout << query << endl;
     // Quering Prolog to see the properties and values
@@ -183,15 +140,9 @@ bool RoboyMind::showPropertySRV(roboy_mind::srvShowProperty::Request  &req,roboy
     for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
     {
         PrologBindings bdg = *it;
-        cout << "Property : " << bdg["A"] << endl;
-        cout << "Value : " << bdg["P"] << endl;
         string property = bdg["A"].toString().substr(bdg["A"].toString().find("#") + 1); //remove the ontology name
-        string value = bdg["P"].toString();
+        string value = bdg["P"].toString().substr(bdg["P"].toString().find("#") + 1);
         attributes[property] = value;
-        ss << bdg["A"];
-        ss << bdg["P"];
-        result.push_back(ss.str());
-        ss.str(std::string());
     }
     // string
     res.property = attributes.dump();
@@ -202,25 +153,16 @@ bool RoboyMind::showPropertyValueSRV(roboy_mind::srvShowPropertyValue::Request  
 {
     vector<string> result;
     // Query part for the object
-    string query = "owl_has('";
-    query += req.object;
-    query += "','" + this->ontology_name;
-    query += req.property;
-    query += "',P)";
+    string query = "show_property('" + req.object + "','" + req.property + "',P)";
     if (SHOW_QUERIES)   
         cout << query << endl;
     // Quering Prolog to see the properties and values
     PrologQueryProxy bdgs = pl.query(query);
-    stringstream ss;
     for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
     {
         PrologBindings bdg = *it;
-        cout << "Value : " << bdg["P"] << endl;
-        ss << bdg["P"];
-        result.push_back(ss.str());
-        ss.str(std::string());
+        res.value.push_back(bdg["P"].toString());
     }
-    res.value = result;
     return true;
 }
 
@@ -260,6 +202,7 @@ bool RoboyMind::saveObjectSRV(roboy_mind::srvSaveObject::Request  &req,roboy_min
     main << prop.str() << "],[" << val.str() << "]," << " Instance)";
     string query = main.str();
     query.erase(std::remove(query.begin(), query.end(), '\n'), query.end());
+    query.erase(std::remove(query.begin(), query.end(), '\\'), query.end());
     if (SHOW_QUERIES)   
         cout << query << endl;
     PrologQueryProxy bdgs = pl.query(query);
@@ -305,27 +248,22 @@ bool RoboyMind::getObjectSRV(roboy_mind::srvGetObject::Request  &req,roboy_mind:
     main << prop.str() << "],[" << val.str() << "], Class, Instance)";
     string query = main.str();
     query.erase(std::remove(query.begin(), query.end(), '\n'), query.end());
+    query.erase(std::remove(query.begin(), query.end(), '\\'), query.end());
     if (SHOW_QUERIES)   
         cout << query << endl;
     PrologQueryProxy bdgs = pl.query(query);
     res.result = false;
-    string inst,cl;
+    json instances;
     for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
     {
         PrologBindings bdg = *it;
-        inst = (bdg["Instance"].toString());
-        if (inst.find("#", 0) !=std::string::npos)
-            res.instance = inst.substr(inst.find("#", 0)+1);
-        else
-            res.instance = inst;
-
-        cl = (bdg["Class"].toString());
-        if (cl.find("#", 0) !=std::string::npos)
-            res.class_name = cl.substr(cl.find("#", 0)+1);
-        else
-            res.instance = inst;
+        string class_name = bdg["Class"].toString().substr(bdg["Class"].toString().find("#") + 1); //remove the ontology name
+        string instance = bdg["Instance"].toString().substr(bdg["Instance"].toString().find("#") + 1);
+        instances[instance] = class_name;
         res.result = true;
     }
+
+    res.instance = instances.dump();
     return true;  
 }
 
