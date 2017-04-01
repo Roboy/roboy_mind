@@ -102,7 +102,7 @@ bool RoboyMind::findInstancesSRV(roboy_mind::srvFindInstances::Request  &req,rob
     for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
     {
         PrologBindings bdg = *it;
-        ss << bdg["A"];
+        ss << bdg["A"].toString().substr(bdg["A"].toString().find("#") + 1); 
         res.instances.push_back(ss.str());
         ss.str(std::string());
     }
