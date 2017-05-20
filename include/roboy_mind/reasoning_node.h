@@ -17,17 +17,17 @@
 #include <json_prolog/prolog.h>
 
 //LOGIC SERVICES
-#include <roboy_mind/srvAssertProperty.h>
-#include <roboy_mind/srvCallQuery.h>
-#include <roboy_mind/srvCheckProperty.h>
-#include <roboy_mind/srvCheckQuery.h>
-#include <roboy_mind/srvCreateInstance.h>
-#include <roboy_mind/srvFindInstances.h>
-#include <roboy_mind/srvShowInstances.h>
-#include <roboy_mind/srvShowProperty.h>
-#include <roboy_mind/srvShowPropertyValue.h>
-#include <roboy_mind/srvSaveObject.h>
-#include <roboy_mind/srvGetObject.h>
+#include <roboy_communication_cognition/AssertProperty.h>
+#include <roboy_communication_cognition/CallQuery.h>
+#include <roboy_communication_cognition/CheckProperty.h>
+#include <roboy_communication_cognition/CheckQuery.h>
+#include <roboy_communication_cognition/CreateInstance.h>
+#include <roboy_communication_cognition/FindInstances.h>
+#include <roboy_communication_cognition/ShowInstances.h>
+#include <roboy_communication_cognition/ShowProperty.h>
+#include <roboy_communication_cognition/ShowPropertyValue.h>
+#include <roboy_communication_cognition/SaveObject.h>
+#include <roboy_communication_cognition/GetObject.h>
 
 
 #include <common.hpp>
@@ -56,7 +56,7 @@ public:
      *  @param   data        variable indicating whether the property is of data or object type, bool
      *  @return  result of the service, bool
      */
-    bool assertPropertySRV(roboy_mind::srvAssertProperty::Request  &req,roboy_mind::srvAssertProperty::Response &res);
+    bool assertPropertySRV(roboy_communication_cognition::AssertProperty::Request  &req,roboy_communication_cognition::AssertProperty::Response &res);
     
     /** Service server for calling queries
      *  @param   req         object of srvCallQuery::Request service type,
@@ -64,7 +64,7 @@ public:
      *  @param   query       query that needs to be called, string
      *  @return  result of the service stating whether the query has been called, bool
      */
-    bool callQuerySRV(roboy_mind::srvCallQuery::Request  &req,roboy_mind::srvCallQuery::Response &res);
+    bool callQuerySRV(roboy_communication_cognition::CallQuery::Request  &req,roboy_communication_cognition::CallQuery::Response &res);
 
     /** Service server for checking property
      *  @param   req         object of srvCheckProperty::Request service type,
@@ -75,7 +75,7 @@ public:
      *  @param   data        variable indicating whether the property is of data or object type, bool
      *  @return  result of the service stating whether the property with the given value was asserted, bool
      */
-    bool checkPropertySRV(roboy_mind::srvCheckProperty::Request  &req,roboy_mind::srvCheckProperty::Response &res);
+    bool checkPropertySRV(roboy_communication_cognition::CheckProperty::Request  &req,roboy_communication_cognition::CheckProperty::Response &res);
 
     /** Service server for checking queries
      *  @param   req         object of srvCheckQuery::Request service type,
@@ -83,7 +83,7 @@ public:
      *  @param   query       query that needs to be checked, string
      *  @return  result of the service stating whether the query is true or false, bool
      */
-    bool checkQuerySRV(roboy_mind::srvCheckQuery::Request  &req,roboy_mind::srvCheckQuery::Response &res);
+    bool checkQuerySRV(roboy_communication_cognition::CheckQuery::Request  &req,roboy_communication_cognition::CheckQuery::Response &res);
 
     /** Service server for instance creation
      *  @param   req            object of srvCreateInstance::Request service type,
@@ -92,7 +92,7 @@ public:
      *  @param   id             id of the instance, int32
      *  @return  result of the service, bool
      */
-    bool createInstanceSRV(roboy_mind::srvCreateInstance::Request  &req,roboy_mind::srvCreateInstance::Response &res);
+    bool createInstanceSRV(roboy_communication_cognition::CreateInstance::Request  &req,roboy_communication_cognition::CreateInstance::Response &res);
 
     /** Service server for finding all instances with a given property
      *  @param   req            object of srvFindInstances::Request service type,
@@ -102,7 +102,7 @@ public:
      *  @param   data           variable indicating whether the property is of data or object type, bool
      *  @return  vector of instances for which the property holds
      */
-    bool findInstancesSRV(roboy_mind::srvFindInstances::Request  &req,roboy_mind::srvFindInstances::Response &res);
+    bool findInstancesSRV(roboy_communication_cognition::FindInstances::Request  &req,roboy_communication_cognition::FindInstances::Response &res);
 
     /** Service server for showing instances
      *  @param   req            object of srvShowInstances::Request service type,
@@ -110,7 +110,7 @@ public:
      *  @param   object_class   name of the object class instances of which should be shown, string
      *  @return  vector of instances for which the property holds
      */
-    bool showInstancesSRV(roboy_mind::srvShowInstances::Request  &req,roboy_mind::srvShowInstances::Response &res);
+    bool showInstancesSRV(roboy_communication_cognition::ShowInstances::Request  &req,roboy_communication_cognition::ShowInstances::Response &res);
 
     /** Service server for showing instances
      *  @param   req            object of srvShowProperty::Request service type,
@@ -118,7 +118,7 @@ public:
      *  @param   object         name of the instance properties of which should be shown, string
      *  @return  vector of properties of the object
      */
-    bool showPropertySRV(roboy_mind::srvShowProperty::Request  &req,roboy_mind::srvShowProperty::Response &res);
+    bool showPropertySRV(roboy_communication_cognition::ShowProperty::Request  &req,roboy_communication_cognition::ShowProperty::Response &res);
 
     /** Service server for showing property values of instances
      *  @param   req            object of srvShowPropertyValue::Request service type,
@@ -127,12 +127,12 @@ public:
      *  @param   property       name of the property, string
      *  @return  vector of properties of the object
      */
-    bool showPropertyValueSRV(roboy_mind::srvShowPropertyValue::Request  &req,roboy_mind::srvShowPropertyValue::Response &res);
+    bool showPropertyValueSRV(roboy_communication_cognition::ShowPropertyValue::Request  &req,roboy_communication_cognition::ShowPropertyValue::Response &res);
 
 
-    bool saveObjectSRV(roboy_mind::srvSaveObject::Request  &req,roboy_mind::srvSaveObject::Response &res);
+    bool saveObjectSRV(roboy_communication_cognition::SaveObject::Request  &req,roboy_communication_cognition::SaveObject::Response &res);
 
-    bool getObjectSRV(roboy_mind::srvGetObject::Request  &req,roboy_mind::srvGetObject::Response &res);
+    bool getObjectSRV(roboy_communication_cognition::GetObject::Request  &req,roboy_communication_cognition::GetObject::Response &res);
 
 private:
     Prolog pl;

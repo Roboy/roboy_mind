@@ -48,10 +48,10 @@
   <build_depend>knowrob_actions</build_depend>
   <build_depend>knowrob_map_data</build_depend>
   <build_depend>knowrob_map_tools</build_depend>
-  <build_depend>message_generation</build_depend>
   <build_depend>rosjava_bootstrap</build_depend>
   <build_depend>rosjava_build_tools</build_depend>
   <build_depend>rosjava_messages</build_depend>
+  <build_depend>roboy_communication_cognition</build_depend>
 
   <run_depend>json_prolog</run_depend>
   <run_depend>knowrob_actions</run_depend>
@@ -64,7 +64,7 @@
   <run_depend>roscpp</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>std_msgs</run_depend>
-
+  <run_depend>roboy_communication_cognition</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

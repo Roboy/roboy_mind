@@ -6,8 +6,7 @@ set(CMAKE_CXX_FLAGS "-std=c++11")
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
-  std_msgs
-  message_generation  
+  std_msgs 
   json_prolog
   knowrob_actions
   knowrob_map_data
@@ -15,33 +14,9 @@ find_package(catkin REQUIRED COMPONENTS
   rosjava_bootstrap
   rosjava_build_tools
   rosjava_messages
+  roboy_communication_cognition
 )
 
-
-## Generate services in the 'srv' folder
-add_service_files(
-   DIRECTORY
-    srv
-   FILES
-    srvAssertProperty.srv
-    srvCallQuery.srv
-    srvCheckProperty.srv
-    srvCheckQuery.srv
-    srvCreateInstance.srv
-    srvFindInstances.srv
-    srvShowInstances.srv
-    srvShowProperty.srv
-    srvShowPropertyValue.srv
-
-    srvSaveObject.srv
-    srvGetObject.srv
- )
-
-## Generate added messages and services with any dependencies listed here
-generate_messages(
-   DEPENDENCIES
-   std_msgs
-)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -71,7 +46,7 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES tumgo_control
-   CATKIN_DEPENDS message_runtime
+   CATKIN_DEPENDS message_runtime roboy_communication_cognition
 #  DEPENDS system_lib
 )
 
