@@ -72,6 +72,7 @@ include_directories(
 ## either from message generation or dynamic reconfigure
 # add_dependencies(tumgo_control ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
+
 ## Declare a C++ executable
 add_executable(reasoning_node src/reasoning_node.cpp)
 add_dependencies(reasoning_node roboy_mind_generate_messages_cpp)
@@ -85,5 +86,15 @@ target_link_libraries(reasoning_node  ${catkin_LIBRARIES})
 ## in contrast to setup.py, you can choose the destination
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
+install(TARGETS
+        reasoning_node
+        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(FILES
+        package.xml
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+
  install(DIRECTORY launch config
    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
