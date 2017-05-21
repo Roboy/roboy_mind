@@ -75,7 +75,7 @@ include_directories(
 
 ## Declare a C++ executable
 add_executable(reasoning_node src/reasoning_node.cpp)
-add_dependencies(reasoning_node roboy_mind_generate_messages_cpp)
+add_dependencies(reasoning_node roboy_communication_cognition_generate_messages_cpp)
 target_link_libraries(reasoning_node  ${catkin_LIBRARIES})
 
 #############
@@ -96,5 +96,5 @@ install(FILES
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
- install(DIRECTORY launch config
+ install(DIRECTORY launch 
    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
