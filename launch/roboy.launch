@@ -1,0 +1,37 @@
+<launch>
+	<!-- memory -->
+	<param name="initial_package" type="string" value="roboy_mind" />
+	<param name="initial_goal" type="string" value="owl_parse('package://roboy_mind/owl/semRoom_semantic_map.owl')" />
+	<node name="json_prolog" pkg="json_prolog" type="json_prolog_node" cwd="node" output="screen" />
+	<node name="reasoning_node" pkg="roboy_mind" type="reasoning_node" cwd="node" output="screen" />
+
+	<!-- face --> 
+	<node name="unity_face" pkg="roboy_face" type="unity_face.py" respawn="true" output="screen" />
+
+	<!-- speech synthesis -->
+	<rosparam command="load" file="$(find speech_synthesis)/yaml/speech_synthesis.yaml" />
+    <node pkg="speech_synthesis" type="tts_server.py" name="speech_synthesis" respawn="true" output="screen"/>
+
+    <!-- vision -->
+   <!--  <node name="face_detect" pkg="vision_service" type="face_detector.py" output="screen" />
+	<node name="face_recognize" pkg="vision_service" type="face_recognizer.py" output="screen" /> -->
+
+	<!-- speech recognition -->
+	<node name="speech_recognize" pkg="roboy_speech_recognition" type="stt_server.py" output="screen" />
+
+	<!-- generative NLP -->
+	<param name="seq2seq/dataset_dir"  value="$(find roboy_generative_nlp)/include/Datasets/twitter/processed" type="str"/>
+	<param name="seq2seq/ckpt_dir" value="$(find roboy_generative_nlp)/include/Datasets/twitter/checkpoints" type="str"/>
+	<param name="seq2seq/batch_size"  value="16" type="int"/>
+	<param name="seq2seq/epochs"  value="500" type="int"/>
+	<param name="seq2seq/lr"  value="0.0001" type="double" />
+	<param name="seq2seq/num_layers"  value="3" type="int" />
+	<param name="seq2seq/emb_dim"  value="1024" type="int" />
+
+	<node name="GNLP" pkg="roboy_generative_nlp" type="seq2seq_ros.py" output="screen" />
+
+	<!-- movement -->
+	<node name="move" pkg="roboy_move" type="move.py" respawn="true" output="screen" />
+
+	
+</launch>

@@ -17,7 +17,7 @@ using json = nlohmann::json;
 /* *******************
 * Service functions
 * *******************/
-bool RoboyMind::assertPropertySRV(roboy_mind::srvAssertProperty::Request  &req,roboy_mind::srvAssertProperty::Response &res)
+bool RoboyMind::assertPropertySRV(roboy_communication_cognition::AssertProperty::Request  &req,roboy_communication_cognition::AssertProperty::Response &res)
 {
     // Query part for the object
     string query = "assert_property('" + req.object + "','" + req.property + "','" + req.instance + "')";
@@ -28,7 +28,7 @@ bool RoboyMind::assertPropertySRV(roboy_mind::srvAssertProperty::Request  &req,r
     return true;
 }
 
-bool RoboyMind::callQuerySRV(roboy_mind::srvCallQuery::Request  &req,roboy_mind::srvCallQuery::Response &res)
+bool RoboyMind::callQuerySRV(roboy_communication_cognition::CallQuery::Request  &req,roboy_communication_cognition::CallQuery::Response &res)
 {
     // Quering Prolog
     PrologQueryProxy bdgs = pl.query(req.query);
@@ -44,7 +44,7 @@ bool RoboyMind::callQuerySRV(roboy_mind::srvCallQuery::Request  &req,roboy_mind:
 }
 
 
-bool RoboyMind::checkPropertySRV(roboy_mind::srvCheckProperty::Request  &req,roboy_mind::srvCheckProperty::Response &res)
+bool RoboyMind::checkPropertySRV(roboy_communication_cognition::CheckProperty::Request  &req,roboy_communication_cognition::CheckProperty::Response &res)
 {
     // Query part for the object
     string query = "check_property('" + req.object + "','" + req.property + "','" + req.instance + "')";
@@ -59,7 +59,7 @@ bool RoboyMind::checkPropertySRV(roboy_mind::srvCheckProperty::Request  &req,rob
     }
 }
 
-bool RoboyMind::checkQuerySRV(roboy_mind::srvCheckQuery::Request  &req,roboy_mind::srvCheckQuery::Response &res)
+bool RoboyMind::checkQuerySRV(roboy_communication_cognition::CheckQuery::Request  &req,roboy_communication_cognition::CheckQuery::Response &res)
 {
     // Quering Prolog to see the instances
     PrologQueryProxy bdgs = pl.query(req.query);
@@ -75,7 +75,7 @@ bool RoboyMind::checkQuerySRV(roboy_mind::srvCheckQuery::Request  &req,roboy_min
     return true;
 }
 
-bool RoboyMind::createInstanceSRV(roboy_mind::srvCreateInstance::Request  &req,roboy_mind::srvCreateInstance::Response &res)
+bool RoboyMind::createInstanceSRV(roboy_communication_cognition::CreateInstance::Request  &req,roboy_communication_cognition::CreateInstance::Response &res)
 {
     // Building the query
     string query = "create_instance_from_class('" + this->ontology_name;
@@ -91,7 +91,7 @@ bool RoboyMind::createInstanceSRV(roboy_mind::srvCreateInstance::Request  &req,r
     return true;
 }
 
-bool RoboyMind::findInstancesSRV(roboy_mind::srvFindInstances::Request  &req,roboy_mind::srvFindInstances::Response &res)
+bool RoboyMind::findInstancesSRV(roboy_communication_cognition::FindInstances::Request  &req,roboy_communication_cognition::FindInstances::Response &res)
 {
     // Query part for the object
     string query = "find_instances(A,'" + req.property + "','" + req.value + "')";
@@ -102,14 +102,15 @@ bool RoboyMind::findInstancesSRV(roboy_mind::srvFindInstances::Request  &req,rob
     for(PrologQueryProxy::iterator it=bdgs.begin();it != bdgs.end(); it++)
     {
         PrologBindings bdg = *it;
-        ss << bdg["A"];
+        ss << bdg["A"].toString().substr(bdg["A"].toString().find("#") + 1); 
+        cout << "Found an instance" << ss.str() << "\n";
         res.instances.push_back(ss.str());
         ss.str(std::string());
     }
     return true;
 }
 
-bool RoboyMind::showInstancesSRV(roboy_mind::srvShowInstances::Request  &req,roboy_mind::srvShowInstances::Response &res)
+bool RoboyMind::showInstancesSRV(roboy_communication_cognition::ShowInstances::Request  &req,roboy_communication_cognition::ShowInstances::Response &res)
 {
     string query = "show_instances(I, '" + req.object_class + "')";
     if (SHOW_QUERIES) 
@@ -127,7 +128,7 @@ bool RoboyMind::showInstancesSRV(roboy_mind::srvShowInstances::Request  &req,rob
     return true;
 }
 
-bool RoboyMind::showPropertySRV(roboy_mind::srvShowProperty::Request  &req,roboy_mind::srvShowProperty::Response &res)
+bool RoboyMind::showPropertySRV(roboy_communication_cognition::ShowProperty::Request  &req,roboy_communication_cognition::ShowProperty::Response &res)
 {
     // Query part for the object
     string query = "show_property('" + req.object + "',A,P)";
@@ -149,7 +150,7 @@ bool RoboyMind::showPropertySRV(roboy_mind::srvShowProperty::Request  &req,roboy
     return true;
 }
 
-bool RoboyMind::showPropertyValueSRV(roboy_mind::srvShowPropertyValue::Request  &req,roboy_mind::srvShowPropertyValue::Response &res)
+bool RoboyMind::showPropertyValueSRV(roboy_communication_cognition::ShowPropertyValue::Request  &req,roboy_communication_cognition::ShowPropertyValue::Response &res)
 {
     vector<string> result;
     // Query part for the object
@@ -166,7 +167,7 @@ bool RoboyMind::showPropertyValueSRV(roboy_mind::srvShowPropertyValue::Request  
     return true;
 }
 
-bool RoboyMind::saveObjectSRV(roboy_mind::srvSaveObject::Request  &req,roboy_mind::srvSaveObject::Response &res)
+bool RoboyMind::saveObjectSRV(roboy_communication_cognition::SaveObject::Request  &req,roboy_communication_cognition::SaveObject::Response &res)
 {    
     // Query part for the object
     // save_object(Class, ID, Properties, Values, Instance)
@@ -174,32 +175,49 @@ bool RoboyMind::saveObjectSRV(roboy_mind::srvSaveObject::Request  &req,roboy_min
     stringstream prop(req.properties);
     stringstream val(req.values);
 
-    main << "save_object('" << req.class_name << "','" << req.id << "',[";
+    main << "save_object('" << req.class_name << "','" << req.id << "',['";
 
-    // stringstream ss(req.properties);
-    // std::vector<string> properties;
+    std::vector<string> properties;
+    std::vector<string> values;
 
-    // while(ss.good())
-    // {
-    //     string substr;
-    //     getline(ss, substr, ',');
-    //     properties.push_back(substr);
-    // }
-    // Save names
-    // for (int i = 0; i < properties.size(); i++)
-    // {
-    //     if (i != req.properties.size() - 1)
-    //     {
-    //         prop << req.properties[i] << "','";
-    //         val << req.values[i] << "','";
-    //     }
-    //     else
-    //     {
-    //         prop << req.properties[i] << "'],['";
-    //         val << req.values[i] << "'],";         
-    //     }
-    // }
-    main << prop.str() << "],[" << val.str() << "]," << " Instance)";
+    while(prop.good())
+    {
+        string substr;
+        getline(prop, substr, ',');
+        cout << "substring " << substr << endl;
+        properties.push_back(substr);
+    }
+
+    while(val.good())
+    {
+        string substr;
+        getline(val, substr, ',');
+        cout << "substring " << substr << endl;
+        values.push_back(substr);
+    }
+
+
+    val.clear();
+    prop.clear();
+
+    //Save names
+    for (int i = 0; i < properties.size(); i++)
+    {
+        if (i != properties.size() - 1)
+        {
+            prop << properties[i] << "','";
+            val << values[i] << "','";
+        }
+        else
+        {
+            prop << properties[i] << "'],['";
+            val << values[i] << "'],";         
+        }
+    }
+
+
+
+    main << prop.str() << val.str() << " Instance)";
     string query = main.str();
     query.erase(std::remove(query.begin(), query.end(), '\n'), query.end());
     query.erase(std::remove(query.begin(), query.end(), '\\'), query.end());
@@ -222,7 +240,7 @@ bool RoboyMind::saveObjectSRV(roboy_mind::srvSaveObject::Request  &req,roboy_min
 }
 
 
-bool RoboyMind::getObjectSRV(roboy_mind::srvGetObject::Request  &req,roboy_mind::srvGetObject::Response &res)
+bool RoboyMind::getObjectSRV(roboy_communication_cognition::GetObject::Request  &req,roboy_communication_cognition::GetObject::Response &res)
 {    
     // Query part for the object
     // get_object(Properties, Values, Class, Instance)
